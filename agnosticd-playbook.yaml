@@ -1,0 +1,123 @@
+---
+- name: Run AgnosticD on Openshift
+  gather_facts: false
+  hosts: localhost
+  tasks:
+    - name: Log Into POC Cluster
+      k8s_auth:
+        host: https://api.cluster-zt755.example.opentlc.com:6443
+        username: admin
+        password: MTM0MTIy_1
+        validate_certs: false
+      register: r_poc_cluster
+      retries: 240
+      delay: 15
+      until:
+      - r_poc_cluster.k8s_auth.api_key is defined
+
+    - name: Create Namespace
+      k8s:
+        host: "{{ r_poc_cluster.k8s_auth.host }}"
+        username: "{{ r_poc_cluster.k8s_auth.username }}"
+        api_key: "{{ r_poc_cluster.k8s_auth.api_key }}"
+        validate_certs: false
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: agnosticd-poc
+
+    - name: Create Service Account
+      k8s:
+        host: "{{ r_poc_cluster.k8s_auth.host }}"
+        username: "{{ r_poc_cluster.k8s_auth.username }}"
+        api_key: "{{ r_poc_cluster.k8s_auth.api_key }}"
+        validate_certs: false
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: agnosticd-poc-sa
+            namespace: agnosticd-poc
+
+    - name: Create Service Account CRB
+      k8s:
+        host: "{{ r_poc_cluster.k8s_auth.host }}"
+        username: "{{ r_poc_cluster.k8s_auth.username }}"
+        api_key: "{{ r_poc_cluster.k8s_auth.api_key }}"
+        validate_certs: false
+        state: present
+        definition:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: agnosticd-poc-crb
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: cluster-admin
+          subjects:
+          - kind: ServiceAccount
+            name: agnosticd-poc-sa
+            namespace: agnosticd-poc
+
+    - name: Create ConfigMap
+      vars:
+        variables: "{{ lookup('file', 'variables.yaml') }}"
+        playbook: "{{ lookup('file', 'playbook.yaml') }}"
+      k8s:
+        host: "{{ r_poc_cluster.k8s_auth.host }}"
+        username: "{{ r_poc_cluster.k8s_auth.username }}"
+        api_key: "{{ r_poc_cluster.k8s_auth.api_key }}"
+        validate_certs: false
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: agnosticd-poc-files
+            namespace: agnosticd-poc
+          data:
+            variables.yaml: "{{ variables }}"
+            playbook.yaml: "{{ playbook }}"
+
+    - name: Create Job
+      k8s:
+        host: "{{ r_poc_cluster.k8s_auth.host }}"
+        username: "{{ r_poc_cluster.k8s_auth.username }}"
+        api_key: "{{ r_poc_cluster.k8s_auth.api_key }}"
+        validate_certs: false
+        state: present
+        definition:
+          kind: Job
+          apiVersion: batch/v1
+          metadata:
+            name: agnosticd-player
+            namespace: agnosticd-poc
+          spec:
+            backoffLimit: 100
+            template:
+              spec:
+                volumes:
+                  - name: agnosticd-poc-files-vol
+                    configMap:
+                      name: agnosticd-poc-files
+                containers:
+                  - name: ansible-test
+                    image: 'quay.io/agnosticd/ee-multicloud:latest'
+                    command:
+                      - /bin/bash
+                      - '-c'
+                      - |
+                        useradd -m ec2-user
+                        git clone https://github.com/redhat-cop/agnosticd.git
+                        cd agnosticd
+                        cp /agnosticd-poc/playbook.yaml ./ansible/playbook-poc.yaml
+                        ansible-playbook -i localhost ./ansible/playbook-poc.yaml -e "ACTION=create" -e @/agnosticd-poc/variables.yaml
+                    volumeMounts:
+                      - name: agnosticd-poc-files-vol
+                        mountPath: /agnosticd-poc
+                restartPolicy: Never
+                serviceAccount: agnosticd-poc-sa

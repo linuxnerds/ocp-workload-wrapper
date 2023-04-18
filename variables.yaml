@@ -1,0 +1,8 @@
+ocp4_workload_rhacs_install_operator_channel: "rhacs-3.73"
+ocp4_workload_rhacs_install_operator_starting_csv: "rhacs-operator.v3.73.1"
+ocp4_workload_rhacs_install_operator_use_catalog_snapshot: true
+ocp4_workload_rhacs_central_admin_password: admin
+student_name: ec2-user
+
+ocp4_workloads:
+- ocp4_workload_rhacs

@@ -1,0 +1,6 @@
+- hosts: localhost
+  tasks:
+  - include_role:
+      name: "{{ item }}"
+    with_items:
+      - "{{ ocp4_workloads }}"
