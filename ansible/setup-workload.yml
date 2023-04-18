@@ -65,8 +65,8 @@
 
     - name: Create ConfigMap
       vars:
-        variables: "{{ lookup('file', '../vars/sample_vars.yml') }}"
-        playbook: "{{ lookup('file', 'run-workload.yml') }}"
+        variables: "{{ lookup('file', '../ansible/vars/sample_vars.yml') }}"
+        playbook: "{{ lookup('file', '../ansible/run-workload.yml') }}"
       k8s:
         host: "{{ w_ocp_cluster_api }}"
         username: "{{ w_ocp_cluster_user }}"
