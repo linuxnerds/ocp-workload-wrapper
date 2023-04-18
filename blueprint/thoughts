@@ -1,0 +1,66 @@
+
+--------------------------
+
+Script location git repo  ? Linuxnerds
+1: virtual env
+2: python & module
+3: Collection 
+4: playbook
+ansible-playbook k8s / playbook.
+
+--------------------------
+Execution of wrapper from laptop/workstation/bastion/
+    windows?
+
+1: Clusster -> Yes -> Provide credentials.
+    |
+    NO -> Create cluster. -> break the script
+
+2: Agd Roles -> No -> Custom playbooks -> No -> GitOps -> NO -> break the script
+
+
+3: Agd Roles -> Yes -> default agd or fork -> version -> Variable File path.
+    -> Playbook -> Configmap -> 
+
+4: Custom Playbooks -> Yes -> Git repo path
+
+5: GitOps -> yes - Gitrepo for argocd
+
+--------------------------
+Agd
+1- Existing OCP cluster
+    Credentials
+        prompt
+        token/ UN & PW
+
+2: List of workloads (YAML)
+    Configmap
+
+3: Variables for workloads (YAML)
+    Configmap
+
+4: Execution steps
+    ansible-playbook playbook.yml -e agnosticV -e Configmap_for_workload_and_variables
+
+
+---------------------
+Custom playbook
+1: Collections & Roles
+2: Python & Module dependency
+3: Ansible
+4: Playbook
+
+Git repo
+requirements.yml (collection & roles)
+requirements.txt (Python and Module dep)
+bindep.txt (binary)?
+
+un/pw/token
+
+(requirement cluster privileged user/token)
+
+-----------------------
+GitOps
+
+1: Argocd repository
+2: 
