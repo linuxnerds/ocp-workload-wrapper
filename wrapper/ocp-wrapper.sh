@@ -34,16 +34,11 @@ wrapper_custom_playbook_inputs() {
     read -p "Provide git repository URL for custom playbook: " w_custom_playbook_git_url
 }
 
-# w_agnosticd_processor() {
-
-
-# }
 wrapper_virtualenv() {
     if [ ! -f /tmp/wrapper/bin/activate ]; then
         bash -c '
         python3 -m venv /tmp/wrapper;
         source /tmp/wrapper/bin/activate;
-        python3 -m pip install -U pip;
         python3 -m pip install -r requirements.txt
         deactivate'
         source /tmp/wrapper/bin/activate
@@ -51,7 +46,19 @@ wrapper_virtualenv() {
         source /tmp/wrapper/bin/activate
     fi
 }
+wrapper_collections(){
+    source /tmp/wrapper/bin/activate
+    ansible-galaxy collection install -r requirements.txt
+}
 
+wrapper_agnosticd_processor() {
+    deactivate
+    source /tmp/wrapper/bin/activate
+    ansible-playbook ../ansible/setup-workload.yml \
+    -e w_ocp_cluster_api=${w_ocp_cluster_api} \
+    -e w_ocp_cluster_user=${w_ocp_cluster_user} \
+    -e w_ocp_cluster_password=${w_ocp_cluster_password}
+}
 
 modes=(AgnosticD GitOps  Custom_Playbook Validation)
 wrapper_welcome_msg="Welcome to ocp workload wrapper"
@@ -70,6 +77,8 @@ wrapper_processor() {
                 AgnosticD)
                     wrapper_agnosticd_inputs
                     wrapper_virtualenv
+                    wrapper_collections
+                    wrapper_agnosticd_processor
                     ;;
                 GitOps) 
                     wrapper_argocd_inputs
