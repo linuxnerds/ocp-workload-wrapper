@@ -68,12 +68,15 @@ wrapper_processor() {
         do
             case ${mode} in
                 AgnosticD)
-                    wrapper_agnosticd_inputs;;
-                    wrapper_virtualenv;;
+                    wrapper_agnosticd_inputs
+                    wrapper_virtualenv
+                    ;;
                 GitOps) 
-                    wrapper_argocd_inputs;;
+                    wrapper_argocd_inputs
+                    ;;
                 Custom_Playbook) 
-                    wrapper_custom_playbook_inputs;;
+                    wrapper_custom_playbook_inputs
+                    ;;
             esac
             break
         done
