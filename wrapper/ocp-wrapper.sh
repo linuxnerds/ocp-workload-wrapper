@@ -14,22 +14,16 @@ wrapper_openshift_inputs() {
     if [ ${#w_ocp_cluster_token} -eq 0 ]; then
         read -p "Provide OpenShift cluster User's Password: " w_ocp_cluster_password
     fi
-}   
-
+}
 
 wrapper_agnosticd_inputs() {
-    read -n 1 -p "Do you want to use your own AgnosticD fork? [y/n]: " w_agd_fork;  printf "\n"
-    if [ "${w_agd_fork}" == "y" ]; then
-        read -p "Provide AgnosticD fork git repository URL: " w_agd_fork_git_repo
-        read -p "Provide AgnosticD git repository version: " w_agd_fork_git_version
-    else
-        read -p "Provide AgnosticD git repository version [Default development]: " w_agd_fork_git_version
-    fi
+    read -p "Provide AgnosticD repository [Default: redhat-cop/agnosticd]: " w_agd_git_repo
+    read -p "Provide repository version (tag or branch) [Default: development]: " w_agd_git_version
     read -p "Provide Variables file path: " w_agd_variables_file_path
-    if [ ${#w_agd_variables_file_path} -eq 0 ]; then
-        printf "\n%s\n\n" "Variables file path can't be empty"
-        exit 2
-    fi
+    # if [ ${#w_agd_variables_file_path} -eq 0 ]; then
+        # printf "\n%s\n\n" "Variables file path can't be empty"
+        # exit 2
+    # fi
 }
 
 wrapper_argocd_inputs() {
@@ -40,7 +34,26 @@ wrapper_custom_playbook_inputs() {
     read -p "Provide git repository URL for custom playbook: " w_custom_playbook_git_url
 }
 
-modes=(AgnosticD GitOps  Custom_Playbook)
+# w_agnosticd_processor() {
+
+
+# }
+wrapper_virtualenv() {
+    if [ ! -f /tmp/wrapper/bin/activate ]; then
+        sudo -- bash -c '
+        python3 -m venv /tmp/wrapper;
+        source /tmp/wrapper/bin/activate;
+        python3 -m pip install -U pip;
+        python3 -m pip install -r requirements.txt
+        deactivate'
+        source /tmp/wrapper/bin/activate
+    else
+        source /tmp/wrapper/bin/activate
+    fi
+}
+
+
+modes=(AgnosticD GitOps  Custom_Playbook Validation)
 wrapper_welcome_msg="Welcome to ocp workload wrapper"
 wrapper_continue_msg="Wrapper will ask few question to proceed further
 To continue type y [y/n]"
@@ -56,6 +69,7 @@ wrapper_processor() {
             case ${mode} in
                 AgnosticD)
                     wrapper_agnosticd_inputs;;
+                    wrapper_virtualenv;;
                 GitOps) 
                     wrapper_argocd_inputs;;
                 Custom_Playbook) 
