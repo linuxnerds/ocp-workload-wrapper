@@ -69,7 +69,7 @@ wrapper_processor() {
     fi
 }
 
-main() {}
+main() {
     clear
     printf "\n%s\n\n" "${wrapper_welcome_msg}"
     read -n 1 -p "${wrapper_continue_msg}: " w_continue ; printf "\n"
