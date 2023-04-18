@@ -40,7 +40,7 @@ wrapper_custom_playbook_inputs() {
 # }
 wrapper_virtualenv() {
     if [ ! -f /tmp/wrapper/bin/activate ]; then
-        sudo -- bash -c '
+        bash -c '
         python3 -m venv /tmp/wrapper;
         source /tmp/wrapper/bin/activate;
         python3 -m pip install -U pip;
