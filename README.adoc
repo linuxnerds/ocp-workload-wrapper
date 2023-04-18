@@ -4,7 +4,7 @@
 * APAC-DemoLISHERS
 
 == Authors
-* Mitesh Sharma (mitsharm@redhat.com)
 * Tyrell Reddy (treddy@redhat.com)
+* Mitesh Sharma (mitsharm@redhat.com)
 * Prakhar Srivastava (psrivast@redhat.com)
 * Ritesh Shah (rshah@redhat.com)
